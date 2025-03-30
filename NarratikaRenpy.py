@@ -101,6 +101,9 @@ def compile(source):
     def parsedirective(line):
         directive = unprefix(line, 1)
         [key, *parts] = directive.split(" ")
+        # parts = directive.split(" ")
+        # key = parts[0]
+        # parts = parts[1:]
         return SimpleNamespace(
             directive = directive,
             key = key,
@@ -121,6 +124,9 @@ def compile(source):
 
     def parsedialog(line, shift):
         [name, *parts] = unprefix(line, shift or 1).split(">")
+        # parts = unprefix(line, shift or 1).split(">")
+        # name = parts[0]
+        # parts = parts[1:]
         return SimpleNamespace(
             name = name.strip(),
             text = ">".join(parts).strip(),
@@ -135,7 +141,7 @@ def compile(source):
     def makedirective(directive):
         nonlocal nextpadding
         if directive.key in ["menu", "choice"]:
-            return f"    choice:\n" + \
+            return f"    menu:\n" + \
                    f"        {makestring(directive.body)}"
         elif directive.key in ["label"]:
             return f"{directive.key} {directive.body}:"
@@ -171,7 +177,7 @@ def compile(source):
             return ""
 
     def makefragment(line, shift, _):
-        return f"    {unprefix(line, shift or 2)}"
+        return unprefix(line, shift or 2) # TODO automatic indentation?
 
     def makecomment(line, shift, _):
         return f"    # {unprefix(line, shift or 2)}"
@@ -180,7 +186,18 @@ def compile(source):
 
 if __name__ == "__main__":
     from sys import argv
-    if len(argv) == 2:
-        print(compile(open(argv[1], "rb").read().decode('utf8')))
+
+    input = output = None
+    if len(argv) == 2 or len(argv) == 3:
+        input = argv[1]
+        if len(argv) == 3:
+            output = argv[2]
+
+    if input:
+        result = compile(open(argv[1], "rb").read().decode("utf8"))
+        if output:
+            open(output, "wb").write(result.encode("utf8"))
+        else:
+            print(result)
     else:
-        print(f"Usage: {argv[0]} <path_to_script.narratika>")
+        print(f"Usage: {argv[0]} <path_to_input.narratika> [path_to_output.rpy]")
