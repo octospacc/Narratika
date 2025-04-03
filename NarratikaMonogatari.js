@@ -46,16 +46,21 @@ const compile = (source) => {
     
     const isFragment = (line) => line.startsWith('$$');
     const isComment = (line) => line.startsWith('//');
+
+    // TODO normalize all labels when proper line parsing is implemented
+    const normalizeLabel = (label) => label.toLowerCase() === 'start' ? (label[0].toUpperCase() + label.slice(1).toLowerCase()) : label;
     
     const handleDirective = (line) => {
         const directive = unprefix(line, 1);
         const [key, ...parts] = directive.split(' ');
         if (['label'].includes(key)) {
             labelLast = labelThis;
-            script[labelThis = parts.join(' ')] = [];
+            script[labelThis = normalizeLabel(parts.join(' '))] = [];
             if (labelLast) {
                 script[labelLast].push(`jump ${labelThis}`);
             }
+        } else if (['jump'].includes(key)) {
+            script[labelThis].push(`jump ${normalizeLabel(parts.join(' '))}`);
         } else if (['if'].includes(key)) { // TODO
             //script[labelThis].push({ Conditional: { Condition:  } });
         } else if (['else'].includes(key)) { // TODO

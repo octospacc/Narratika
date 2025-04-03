@@ -7,6 +7,9 @@ Currently, transpilers are available to target the following platforms or engine
 * Ren'Py (Python) — CLI program to convert scripts to `.rpy` from `.narratika` files
 * Monogatari (HTML5, JavaScript) — Must be included as a library in a Monogatari game, and used with a call to `Narratika.compile()` to get a JSON object from a Narratika script string
 
+Examples on writing a full, playable novel with Narratika will be available soon, as well as starter guides and development packages for the supported engines.  
+Specific, small examples on language syntax and usage are available below.
+
 ## Specification (with Examples)
 
 (The project is an early work-in-progress and the specification is subject to changes.)
@@ -19,7 +22,9 @@ The start of a given element is declared by a corresponding prefix or format, an
 
 ### Directive
 
-Single-line, declared with `@`.
+Some kind of standard command or action to be executed as supported by the game engine. Directives implemented inside Narratika itself are explained in the sections below.
+
+Single-line, declared with `@`. The first word, which is the name of the command, is case-insensitive.
 
 ```
 @label start
@@ -28,6 +33,22 @@ Single-line, declared with `@`.
 ...
 @jump scene1
 ```
+
+#### label
+
+...
+
+#### jump
+
+...
+
+#### menu/choice
+
+...
+
+#### if
+
+...
 
 ### Switch Item
 
