@@ -7,7 +7,7 @@ Currently, transpilers are available to target the following platforms or engine
 * Ren'Py (Python) — CLI program to convert scripts to `.rpy` from `.narratika` files
 * Monogatari (HTML5, JavaScript) — Must be included as a library in a Monogatari game, and used with a call to `Narratika.compile()` to get a JSON object from a Narratika script string
 
-Examples on writing a full, playable novel with Narratika will be available soon, as well as starter guides and development packages for the supported engines.  
+Many examples on writing a full, playable novel with Narratika will be available soon in the `examples` branch, as well as starter guides and development packages for the supported engines: <https://gitlab.com/octospacc/Narratika/-/tree/examples>.  
 Specific, small examples on language syntax and usage are available below.
 
 ## Specification (with Examples)
@@ -36,19 +36,51 @@ Single-line, declared with `@`. The first word, which is the name of the command
 
 #### label
 
-...
+Defines a named execution unit under which following statements will be grouped.
+
+```
+@label chapter1
+  ...
+```
+
+Note: You always need to define at least one label for Narratika to put code in. You also need to define a starting label in particular, for the game engine to know where to start execution; for most visual novel engines, this will usually be called `start`.
 
 #### jump
 
-...
+Allows diverting execution from any point in the script to any of the defined labels.
+
+```
+  ...
+  @jump chapter1
+```
+
+#### set
+
+Sets a given variable to a given value or the result of an expression (the latter being evaluated by the underlying engine, thus being dependent on its syntax).
+
+```
+  @set isPlayerNice true
+  @set lifePoints -= standardDamage * 1.5
+```
 
 #### menu/choice
 
-...
+Defines a new choice menu with buttons, with an optional narration or dialog line to be shown. Available options must be specified immediately below with the switch item syntax.
+
+```
+  @menu -> ^ What do I do now?
+    * Try to fight -> @jump fight
+    * Retreat -> @jump retreat
+```
 
 #### if
 
-...
+Evaluates a single-line boolean expression, executing the immediately following statement if a true value is returned.
+
+```
+  @if (lifePoints <= 0)
+    <demon> Well. Looks like you're finished.
+```
 
 ### Switch Item
 
@@ -61,6 +93,8 @@ Single-line, declared with `*`. Format is `case -> action`, where `case` is a me
 
 ### Narration
 
+Specifies text to be shown as generic narration. Used for expressing the protagonist's inner monologue or the thoughts of a third-person narrator.
+
 Multi-line, declared with `^`.
 
 ```
@@ -71,6 +105,8 @@ Multi-line, declared with `^`.
 
 ### Dialog
 
+Specifies text to be shown as spoken by a given character (or special entity as provided by the game engine).
+
 Multi-line, declared with `<name>`.
 
 ```
@@ -78,6 +114,8 @@ Multi-line, declared with `<name>`.
 <me> I'm you, but stronger...
      You just don't know by how much.
 ```
+
+Tip: you can use the dialog syntax without a name, starting a line with just `<>`, as an alternative syntax for narration.
 
 ### Code Fragment
 
@@ -94,6 +132,8 @@ $$ () => aFunction(123);
 ```
 
 ### Comment
+
+A comment allows you to add some explanations to your code, adding context, or temporarily disable some lines without deleting them.
 
 Multi-line, declared with `//`.
 

@@ -24,10 +24,6 @@ def compile(source):
         # padding = (" " * nextpadding)
 
         # single-line
-        # if islabel(line):
-        #     lasthandler = None
-        #     return padding + makelabel(line)
-        #     result = makelabel(line)
         if isdirective(line):
             state.lasthandler = None
             directive = parsedirective(line)
@@ -67,9 +63,6 @@ def compile(source):
         else:
             return padding + result
 
-    # def islabel(line):
-    #     return line.startswith("#")
-
     def isdirective(line):
         return line.startswith("@")
 
@@ -80,7 +73,7 @@ def compile(source):
         return line.startswith("^")
 
     def isdialog(line):
-        return (line.startswith("<") and (">" in line)) # or (line.startswith(">") and (":" in line))
+        return (line.startswith("<") and (">" in line))
 
     def isfragment(line):
         return line.startswith("$$")
@@ -88,12 +81,7 @@ def compile(source):
     def iscomment(line):
         return line.startswith("//")
 
-    # def unprefix(line, prefix=" "):
-    #    return prefix.join(line.split(prefix)[1:])
-
     def unprefix(line, shift, /, strip=True):
-        # if shift == None:
-        #     shift = 1
         if shift == -1:
             shift = 0
         line = line[shift:]
@@ -109,8 +97,8 @@ def compile(source):
         # parts = parts[1:]
         return SimpleNamespace(
             directive = directive,
-            key = key,
-            body = ' '.join(parts),
+            key = key.lower(),
+            body = " ".join(parts),
         )
 
     def parseswitch(line):
@@ -141,14 +129,20 @@ def compile(source):
     # def makelabel(line):
     #     return f"label {unprefix(line, 1)}:"
 
+    def normalizelabel(label:str):
+        lower = label.lower()
+        return lower if lower == "start" else label
+
     def makedirective(directive, state):
         #nonlocal nextpadding
         if directive.key in ["label"]:
-            return f"{directive.key} {directive.body.lower()}:"
+            return f"{directive.key} {normalizelabel(directive.body)}:"
         elif directive.key in ["jump", "call"]:
-            return f"    {directive.key} {directive.body.lower()}"
+            return f"    {directive.key} {normalizelabel(directive.body)}"
+        elif directive.key in ["show", "hide"]:
+            return f"    {directive.key} {' '.join(directive.body.split(' ')[1:])}"
         elif directive.key in ["menu", "choice"]:
-            parts = directive.body.split('->')
+            parts = directive.body.split("->")
             return f"    menu:\n" + \
                    f"        {parseline(parts[1]).strip() if len(parts) >= 2 else ''}"
         elif directive.key in ["if", "else"]:
@@ -159,6 +153,13 @@ def compile(source):
         # elif directive.key in ["end"]:
         #     nextpadding -= 4
         #     return "" # TODO
+        elif directive.key in ["set"]:
+            [name, *body] = directive.body.split(" ")
+            operator = "="
+            if body[0].endswith(operator): # allow for composite assignments (eg. +=, -=, ...)
+                operator = body[0]
+                body = body[1:]
+            return f"    $ {name} {operator} {' '.join(body)}"
         else:
             return f"    {directive.directive}"
 
@@ -178,7 +179,7 @@ def compile(source):
         else:
             dialog = state.lastdialog = parsedialog(line, shift)
         if dialog.text:
-            return f"    {dialog.name} {makestring(dialog.text)}"
+            return ("    " + f"{dialog.name} {makestring(dialog.text)}".strip())
         else:
             return ""
 
