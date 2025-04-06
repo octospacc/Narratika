@@ -1,0 +1,6 @@
+*.rpyc
+errors.txt
+traceback.txt
+*/game/cache/*
+*/game/saves/*
+/TheQuestion/game/script.rpy
